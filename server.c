@@ -1,67 +1,50 @@
 #include <stdio.h>
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <string.h>
-#include <unistd.h> 
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
-void main(int argc, char *argv[]) {
-    
-    if(argc < 2){ 
-        perror("No port provided...Exiting");
-        exit(1);
-    }
-    int server_fd; //server socket descriptor
-    int client_fd; //client socket descriptor
-    int port_no;    //port number
-    int client_address; //size of the client address
-    int n;
+#define PORT 8080
 
-    char buffer[256];  //reading data from server to this buffer
-
-    struct sockaddr_in server_addr, client_addr; //for containing the addresses of client and server sockets
-
-    server_fd = socket(AF_INET,SOCK_STREAM,0); //initializing the port number
-    if(server_fd < 0) {
-        perror("Socket initialization failed...Exiting");
-        exit(1);
-    }
-
-    bzero((char *)&server_addr,sizeof(server_addr));
-    
-    port_no = atoi(argv[1]); //setting the port number
-
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port_no);
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-
-    int bindStatus = bind(server_fd,(struct sockaddr *) &server_addr,sizeof(server_addr)); //binding the socket to the server address
-    if(bindStatus < 0){
-        perror("Binding unsuccessfull....Exiting");
-        exit(1);
-    }
-    
-    listen(server_fd,5);  //waiting for incoming connections from the client
-
-    client_address = sizeof(client_addr);
-
-    client_fd = accept(server_fd,(struct sockaddr *) &client_addr,&client_address);
-    if(client_fd < 0){
-        perror("Connection error....Exiting");
-        exit(1);
-    }
-    bzero(buffer,256);
-    n = read(client_fd,buffer,255);
-    if(n<0){
-        perror("Error in reading data");
-        exit(1);
-    }
-    printf("Received message: %s\n",buffer);
-
-    n = write(client_fd,"I got your message",18);
-    if(n<0){
-        perror("Error in writing data");
-        exit(1);
-    }
+void error_print(int error_num)
+{
+    printf("error_print: %s\n",strerror(error_num));
+    exit(1);
 }
+
+void main()
+{
+    int server_fd; 
+    int client_fd;
+    int clilen;
+    struct sockaddr_in serv_addr;
+    struct sockaddr_in cli_addr;
+    char buffer[256];
+    int data_status;
+
+    if(server_fd = socket(AF_INET,SOCK_STREAM,0) < 0) 
+        error_print(errno);
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(PORT);
+
+    if(bind(server_fd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
+        error_print(errno);
+
+    listen(server_fd,5);
+
+    clilen = sizeof(cli_addr);
+
+    if(client_fd = accept(server_fd,(struct sockaddr *)&cli_addr,&clilen) < 0)
+        error_print(errno);
+
+    data_status = read(client_fd,buffer,255);
+    if(data_status < 0)
+        error_print(errno);
+    data_status = write(client_fd,"I got your message",18);
+    if(data_status < 0)
+        error_print(errno);
+}   
