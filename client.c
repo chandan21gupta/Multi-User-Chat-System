@@ -21,28 +21,25 @@ void main ()
     char buffer[256];
     int data_status;
 
-    if(server_fd = socket(AF_INET,SOCK_STREAM,0) < 0) 
-        //error_print(errno);
-        printf("socket");
+    if((server_fd = socket(AF_INET,SOCK_STREAM,0)) < 0) 
+        error_print(errno);
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
 
     if(inet_pton(AF_INET,"127.0.0.1",&serv_addr.sin_addr) <= 0) 
-        //error_print(errno);
-        printf("here");
-    
+        error_print(errno);
+        
     if(connect(server_fd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
-        //error_print(errno);
-        printf("connect");
+        error_print(errno);
 
     fgets(buffer,255,stdin);
     data_status = write(server_fd,buffer,strlen(buffer));
     if(data_status < 0)
-        //error_print(errno);
-        printf("write");
+        error_print(errno);
+        
     data_status = read(server_fd,buffer,255);
     if(data_status < 0)
-        printf("read");
+        error_print(errno);
     printf("%s\n",buffer);
 }
