@@ -5,8 +5,23 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <pthread.h>
 
 #define PORT 8080
+
+int current_client = 0;
+
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+
+struct client
+{
+    int id;
+    int client_fd;
+    struct sockaddr_in client_addr;
+    int address_len;
+};
 
 void error_print(int error_num)
 {
@@ -14,21 +29,38 @@ void error_print(int error_num)
     exit(1);
 }
 
-void dostuff(int socket_fd)
-{   
-    char buffer[256];
-    int data_status;
-    data_status = read(socket_fd,buffer,255);   /*reading data from the client side if any*/
-    printf("%s\n",buffer);                     /*printing the data received*/
-    if(data_status < 0)
-        error_print(errno);
-    data_status = write(socket_fd,"I got your message",18);    /*writing data back to the server*/
-    if(data_status < 0)
-        error_print(errno);
+struct client Client[1024];
+pthread_t thread[1024];
+
+void * listening(void *client_detail)
+{
+    struct client *clientDetail = (struct client *)client_detail;
+    printf("New Connection : Client Number %d\n",(clientDetail->id)+1);
+
+    while(1)
+    {
+        char buffer[256];
+        int data_status = recv((clientDetail->client_fd),buffer,256,0);
+        buffer[data_status] = '\0';
+
+        if(strcmp(buffer,"SEND") == 0)
+        {
+            data_status = recv((clientDetail->client_fd),buffer,1024,0);
+            buffer[data_status] = '\0';
+
+            int index = atoi(buffer)-1;
+            data_status = recv((clientDetail->client_fd),buffer,256,0);
+            buffer[data_status] = '\0';
+
+            send(Client[index].client_fd,buffer,256,0);
+        }
+
+    }
+    return NULL;
 }
 
 void main()
-{
+{   
     int server_fd;                      /*server side socket descriptor*/
     int client_fd;                      /*client side socket descriptor*/
     struct sockaddr_in serv_addr;       /*server address structure*/
@@ -49,20 +81,17 @@ void main()
     
     listen(server_fd,5);   /*telling the server to listen to any incoming collections*/
 
-    while(1){
-        client_fd = accept(server_fd,(struct sockaddr *)&serv_addr,(socklen_t *)&adddress_len);  /*storing the client side socket in a socket descriptor*/
-        if(client_fd < 0)       
-            error_print(errno);
+    while(1)
+    {
+        Client[current_client].client_fd = accept(server_fd,(struct sockaddr *)&Client[current_client].client_addr,&Client[current_client].address_len);
+        Client[current_client].id = current_client;
 
-        pid = fork();
-        if(pid < 0)
-            error_print(errno);
-        
-        if(pid == 0)
-        {
-            close(server_fd);
-            dostuff(client_fd);
-            exit(0);
-        }
+        pthread_create(&thread[current_client],NULL,listening,(void *)&Client[current_client]);
+        current_client++;
+    }
+
+    for(int i=0;i<current_client;i++)
+    {
+        pthread_join(thread[i],NULL);
     }
 }
