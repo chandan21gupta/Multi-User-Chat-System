@@ -16,35 +16,9 @@ void error_print(int error_num)
 
 void main()
 {
-    int server_fd; 
-    int client_fd;
-    int clilen;
-    struct sockaddr_in serv_addr;
-    struct sockaddr_in cli_addr;
-    char buffer[256];
-    int data_status;
-
-    if(server_fd = socket(AF_INET,SOCK_STREAM,0) < 0) 
+    int server_fd;
+    if(server_fd = socket(AF_INET,SOCK_STREAM,0) < 0)
         error_print(errno);
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = htons(PORT);
-
-    if(bind(server_fd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
+    if(bind(server_fd,(struct sockadd *)&serv_addr,sizeof(serv_addr)) < 0)
         error_print(errno);
-
-    listen(server_fd,5);
-
-    clilen = sizeof(cli_addr);
-
-    if(client_fd = accept(server_fd,(struct sockaddr *)&cli_addr,&clilen) < 0)
-        error_print(errno);
-
-    data_status = read(client_fd,buffer,255);
-    if(data_status < 0)
-        error_print(errno);
-    data_status = write(client_fd,"I got your message",18);
-    if(data_status < 0)
-        error_print(errno);
-}   
+}
