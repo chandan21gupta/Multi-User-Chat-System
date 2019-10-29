@@ -53,4 +53,9 @@ Identifiers<br>
 ALL - Send the message to all the clients
 client_id - Send the message to a specific client by using his id
 
-## Description
+## Restrictions
+The default port is 8080.<br>
+The address is localhost.<br>
+The message buffer currently only handle 256 bytes of storage, including the Communication Rules.<br>
+Maximum 1024 clients are currrently allowed to connect simultaneously to the server.<br>
+
