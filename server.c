@@ -45,7 +45,7 @@ void * listening(void *client_detail)
 
         if(strcmp(buffer,"SEND") == 0)
         {
-            data_status = recv((clientDetail->client_fd),buffer,1024,0);
+            data_status = recv((clientDetail->client_fd),buffer,256,0);
             buffer[data_status] = '\0';
 
             int index = atoi(buffer)-1;
