@@ -16,7 +16,6 @@ void error_print(int error_num)
     exit(1);
 }
 
-
 void *receive(void *socket_fd)
 {
     int server_fd = *((int *)socket_fd);
@@ -28,7 +27,21 @@ void *receive(void *socket_fd)
             error_print(errno);
         buffer[data_status] = '\0';
         printf("%s\n",buffer);
+        data_status = recv(server_fd,buffer,256,0);
+        if(data_status < 0)
+            error_print(errno);
+        buffer[data_status] = '\0';
+        printf("%s\n",buffer);
     }
+}
+
+void send_data(int server_fd,char buffer[])
+{
+    send(server_fd,buffer,256,0);
+    scanf("%s",buffer);
+    send(server_fd,buffer,256,0);
+    scanf("%[^\n]s",buffer);
+    send(server_fd,buffer,256,0);
 }
 
 void main ()
@@ -57,21 +70,17 @@ void main ()
         scanf("%s",buffer);
 
         if(strcmp(buffer,"EXIT") == 0)
-            exit(1);
-        else
         {
-            send(server_fd,buffer,256,0);
-            if(send < 0)
-                error_print(errno);
-            scanf("%s",buffer);
-            send(server_fd,buffer,256,0);
-            if(send < 0)
-                error_print(errno);
-            scanf("%[^\n]s",buffer);
-            send(server_fd,buffer,256,0);
-            if(send < 0)
-                error_print(errno);
+            send(server_fd,"EXIT",4,0);
+            exit(1);
         }
-
+        else if(strcmp(buffer,"LIST") == 0)
+        {
+            send(server_fd,"LIST",4,0);
+        }
+        else
+        {   
+            send_data(server_fd,buffer);
+        }
     }
 }
