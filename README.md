@@ -15,13 +15,21 @@ This file acts as a server through which clients send and recerive data from spe
 The steps involved in making the server:<br>
 1) A socket is made using the call socket() and the returned value (socket file descriptor) is stored in a variable.
 2) The socket file descriptor is bound to an address data structure. The default address is the local host.
-3) The server is made to listen to any incoming connections from the clients.
-4) Since a typical socket program can only handle a single client at a time, to handle multiple requests, multiple threads are used. For each incoming new connection, a separate thread is made to process the request, thereby, each client gets its own thread of execution.
-5)Each thread executes the listening() method. The listening method() accepts the incoming connections and sends and receives data.
-6)recv() and send() calls are used to receive and send data from each server and client socket end points.
+3) The server is made to listen to any incoming connections from the clients. For each new client, a new thread is set up.
+4) Each thread executes the listening() method. The listening method() accepts the incoming connections and sends and receives data.
+5) recv() and send() calls are used to receive and send data from each server and client socket end points.
+6) error-print() method is called to print relevant errors in case of a dead function call.
+7) A client of type struct is made which contains the client's id, socket descriptor, client address of type struct, and the address length.
+8) Arrays to store clients of type struct and threads.
+9) existing_clients array which checks which clients have left the system.
+10) pthread_join method, to close all the threads in case the server shuts down.
 
 ## client file
-This file acts as one client. Each instance of this program acts as one client. 
+This file acts as one client. Each instance of this program acts as one client.<br>
+1) A socket is made just like the server.<br>
+2) connect() call connects to the server's address.
+3) The client program accepts the user message. The user message is passed appropriately to the send_data() method to send the data to the server.
+4) To simulate simultaneous send and receive messages, a separate thread is made to handle the receiving part. The thread executes the receiving() method.
 
 ## Running the source
 1) clone this repository.<br>
