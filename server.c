@@ -49,7 +49,7 @@ void * listening(void *client_detail)
         if(strcmp(buffer,"EXIT") == 0)
         {
             printf("Client Number %d exited\n",(clientDetail->id)+1);
-            existing_clients[(clientDetail->id)] = 1;
+            existing_clients[(clientDetail->id)] = 0;
         }
 
         else if(strcmp(buffer,"SEND") == 0)
@@ -67,7 +67,7 @@ void * listening(void *client_detail)
                 buffer[data_status] = '\0';
                 for(int i=0;i<=current_client;i++)
                 {
-                    if(existing_clients[i] == 0 && i != ((clientDetail->id)))
+                    if(existing_clients[i] == 1 && i != ((clientDetail->id)))
                     {   char str[512] = "Client ";
                         char st[5];
                         sprintf(st,"%d ",(clientDetail->id)+1);
@@ -78,29 +78,36 @@ void * listening(void *client_detail)
                     }
                 }
             }
-            else
+            else if(atoi(buffer))
             {
                 int index = atoi(buffer)-1;
-                data_status = recv((clientDetail->client_fd),buffer,256,0);
-                if(data_status < 0)
-                    error_print(errno);
-                buffer[data_status] = '\0';
-                char str[512] = "Client ";
-                char st[5];
-                sprintf(st,"%d ",(clientDetail->id)+1);
-                strcat(str,st);
-                strcat(str,buffer);
-                send(Client[index].client_fd,str,512,0);
+                if(index >= 0 && existing_clients[index] == 1)
+                {
+                    data_status = recv((clientDetail->client_fd),buffer,256,0);
+                    if(data_status < 0)
+                        error_print(errno);
+                    buffer[data_status] = '\0';
+                    char str[512] = "Client ";
+                    char st[5];
+                    sprintf(st,"%d ",(clientDetail->id)+1);
+                    strcat(str,st);
+                    strcat(str,buffer);
+                    send(Client[index].client_fd,str,512,0);
+                }
+                else
+                {
+                    send(clientDetail->client_fd,"No Client with the given ID",50,0);
+                }
             }
         }
-        else if(strcmp(buffer,"LIST")== 0){
+        else if(strcmp(buffer,"LIST") == 0)
+        {
             for(int i=0;i<current_client;i++)
             {
-                if(existing_clients[i] == 0)
+                if(existing_clients[i] == 1)
                     printf("%d\n",(i+1));
             }
         }
-
     }
     return NULL;
 }
@@ -136,6 +143,7 @@ void main()
         Client[current_client].id = current_client;
 
         pthread_create(&thread[current_client],NULL,listening,(void *)&Client[current_client]);
+        existing_clients[current_client] = 1;
         current_client++;
         }
         else

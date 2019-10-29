@@ -78,9 +78,13 @@ void main ()
         {
             send(server_fd,"LIST",4,0);
         }
-        else
+        else if(strcmp(buffer,"SEND") == 0)
         {   
             send_data(server_fd,buffer);
+        }
+        else
+        {
+            printf("Unidentified Comamnd...\n");
         }
     }
 }
