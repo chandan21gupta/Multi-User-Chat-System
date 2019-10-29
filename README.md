@@ -59,3 +59,24 @@ The address is localhost.<br>
 The message buffer currently only handle 256 bytes of storage, including the Communication Rules.<br>
 Maximum 1024 clients are currrently allowed to connect simultaneously to the server.<br>
 
+### Input Errors and its Handling
+1) Incorrect Input<br>
+Output - Invalid Command....
+2) Invalid client_id<br>
+Output - No client with the given id<br>
+
+## Implementation
+### server side
+After creating a socket and listening to connections, an infinite loop is called, which starts making new threads, for handling each client request. The thread handles the listening part, and executes and send or receive calls for the messages.
+The input message if first checked for the communication rules and identifer, and sends data accordingly.<br>
+#### List
+It checks for the clients who are currently active by checking for existing_clients and outputs them on the server side.
+#### EXIT
+It terminates the respective client side and the existing_clients array is updated.
+#### SEND ALL MESSAGE
+It sends the message to all the available clients.
+#### SEND client_id MESSAGE
+It sends the message to the specified client by extracting the client's socket descriptor from the clients array of type struct .
+### client side
+After creating a socket and connecting it to the server, the client can send data to it. However, since it cannot simultaneously read data from the server, a new thread is created to handle that request.
+
